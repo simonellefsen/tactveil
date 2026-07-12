@@ -246,6 +246,16 @@
 				<button on:click={() => startGame('training')}>Training Mode (All Visible)</button>
 			</div>
 			<p class="hint">Rules enforced by pure engine. No hidden info leaks. Original design.</p>
+			<details class="rules">
+				<summary>Quick Rules</summary>
+				<ul>
+					<li>Setup: Place all 40 pieces in your 4 rows (no lakes).</li>
+					<li>Move 1 square (Scout any straight line).</li>
+					<li>Higher rank wins combat (Spy beats Marshal only when attacking; Miner defuses Bombs).</li>
+					<li>Win by capturing Flag or opponent has no moves.</li>
+					<li>Hidden until combat or long Scout move.</li>
+				</ul>
+			</details>
 		</div>
 	{:else}
 		<div class="status-bar">
@@ -491,6 +501,20 @@
 
 	.legend .red { color: #f0c0a0; font-weight: bold; }
 	.legend .blue { color: #a0c0f0; font-weight: bold; }
+
+	.rules {
+		margin-top: 0.5rem;
+		font-size: 0.75rem;
+		text-align: left;
+		max-width: 400px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.rules ul {
+		margin: 0.3rem 0;
+		padding-left: 1rem;
+	}
 
 	.winner { color: #5a8a5a; font-weight: bold; }
 
