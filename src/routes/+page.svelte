@@ -17,6 +17,19 @@
 
 	const pieceTypes: PieceType[] = ['flag', 'marshal', 'general', 'colonel', 'major', 'captain', 'lieutenant', 'sergeant', 'miner', 'scout', 'spy', 'bomb'];
 
+	function remainingCount(type: PieceType, player: Player) {
+		let count = 0;
+		for (const row of $game.board) {
+			for (const cell of row) {
+				if (cell && cell.player === player && cell.type === type) count++;
+			}
+		}
+		const max = 1; // default, better from config but simple
+		// rough counts from rules
+		const maxes: Record<PieceType, number> = {flag:1, marshal:1, general:1, colonel:2, major:3, captain:4, lieutenant:4, sergeant:4, miner:5, scout:8, spy:1, bomb:6};
+		return Math.max(0, (maxes[type] || 1) - count);
+	}
+
 	// Track last combat for modal
 	let lastCombat = $derived($game.lastCombat);
 
@@ -209,7 +222,7 @@
 				<div class="palette">
 					{#each pieceTypes as type}
 						<button class:selected={selectedPieceType === type} on:click={() => selectPieceType(type)}>
-							{type}
+							{type} ({remainingCount(type, currentViewPlayer)})
 						</button>
 					{/each}
 				</div>
@@ -219,6 +232,7 @@
 					<button on:click={() => handleCommit('red')} disabled={$game.setup.red.committed}>Commit Red</button>
 					<button on:click={() => handleCommit('blue')} disabled={$game.setup.blue.committed}>Commit Blue</button>
 				</div>
+				<p class="remaining">Red to place: {40 - $game.setup.red.placed} | Blue: {40 - $game.setup.blue.placed}</p>
 			</div>
 		{:else if $game.phase === 'playing'}
 			<div class="play-actions">

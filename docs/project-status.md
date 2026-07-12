@@ -46,17 +46,11 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 - [x] Simple AI for single player (random legal after human move)
 - [x] Service worker for offline assets
 - [x] Basic localStorage save/load via serializer + UI buttons
-- [x] Difficulty levels for AI with heuristic scoring (easy random, med/ hard prefer good attacks)
-- [x] Game modes with proper flows, PWA manifest, improved audio
+- [x] Difficulty levels for AI with heuristic scoring (easy random, med/hard prefer good attacks + position)
+- [x] Game modes with proper flows, PWA manifest, improved audio, remaining counts
 - [x] Build succeeds with @sveltejs/adapter-vercel
 - [x] Pushed to https://github.com/simonellefsen/tactveil
-- Next: deeper AI, full tests, more polish, deploy
-- [ ] Board model + lake/position utilities implemented and unit-tested
-- [ ] Legal move generator for every piece type (including Scout pathing)
-- [ ] Combat resolution (exact priority algorithm from rules) implemented + exhaustive tests
-- [ ] Setup validation + auto-setup (random legal placement)
-- [ ] Victory / no-legal-move detection
-- [ ] Hidden-information projection (`getPublicBoard(viewer)`) with tests proving no leakage
+- Next: deeper AI (e.g. basic search), full E2E tests, original piece glyphs/SVGs, Vercel deploy + iPhone test
 - [ ] Immutable state updates + `applyAction(state, action, rng)`
 - [ ] Seeded RNG utility
 - [ ] Serialization (versioned, round-trip safe, migration path)
