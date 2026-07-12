@@ -85,3 +85,27 @@ describe('Seeded RNG (determinism)', () => {
     expect(a).toEqual(b);
   });
 });
+
+describe('RANDOMIZE_SETUP + basic play', () => {
+  it('can randomize setup and produce legal moves without leaking hidden info', () => {
+    let state = createInitialState('singleplayer');
+
+    // Randomize for both
+    state = applyAction(state, { type: 'RANDOMIZE_SETUP', player: 'red', seed: 12345 });
+    state = applyAction(state, { type: 'RANDOMIZE_SETUP', player: 'blue', seed: 67890 });
+
+    state = commitSetup(state, 'red');
+    state = commitSetup(state, 'blue');
+
+    expect(state.phase).toBe('playing');
+
+    // Public view for red should not reveal blue pieces
+    const redView = getPublicGameView(state, 'red');
+    const bluePiecesInView = redView.board.flat().filter((p): p is NonNullable<typeof p> => !!p && p.player === 'blue');
+    const anyRevealed = bluePiecesInView.some(p => p.type !== undefined);
+    expect(anyRevealed).toBe(false); // nothing revealed yet
+
+    // Red should have some legal moves
+    expect(redView.legalMoves.length).toBeGreaterThan(0);
+  });
+});
