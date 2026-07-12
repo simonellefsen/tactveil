@@ -1,14 +1,14 @@
 import { defineConfig } from 'vitest/config';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
-  test: {
-    environment: 'node', // Pure engine tests run in Node, no DOM needed initially
-    include: ['engine/**/*.test.ts', 'src/**/*.test.ts', 'tests/**/*.test.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: ['**/*.test.ts', '**/node_modules/**'],
-    },
-    globals: true,
-  },
+	plugins: [svelte({ hot: !process.env.VITEST })],
+	test: {
+		environment: 'jsdom',
+		include: ['src/**/*.{test,spec}.{js,ts}', 'engine/**/*.test.ts'],
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'json', 'html']
+		}
+	}
 });
