@@ -22,7 +22,7 @@ import {
   FIRST_PLAYER,
   PIECES_PER_PLAYER,
   PIECE_DEFINITIONS,
-} from './constants';
+} from './configuration';
 import type {
   Action,
   Board,

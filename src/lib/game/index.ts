@@ -4,7 +4,7 @@
  */
 
 export * from './types';
-export * from './constants';
+export * from './configuration';
 export * from './board';
 export * from './combat';
 export * from './movement';

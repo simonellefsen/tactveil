@@ -3,7 +3,7 @@
  */
 
 import { createEmptyBoard, setPiece, isValidCell } from './board';
-import { DEPLOYMENT, PIECE_DEFINITIONS, PIECES_PER_PLAYER } from './constants';
+import { DEPLOYMENT, PIECE_DEFINITIONS, PIECES_PER_PLAYER } from './configuration';
 import type { Board, Piece, PieceType, Player, RNG } from './types';
 
 export function createEmptySetupBoard(): Board {

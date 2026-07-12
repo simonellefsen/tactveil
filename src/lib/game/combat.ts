@@ -9,7 +9,7 @@
  */
 
 import type { CombatOutcome, CombatResult, PieceType, Position } from './types';
-import { PIECE_DEFINITIONS } from './constants';
+import { PIECE_DEFINITIONS } from './configuration';
 
 export function getRank(type: PieceType): number | null {
   return PIECE_DEFINITIONS[type].rank;

@@ -12,7 +12,7 @@ import {
   positionsEqual,
   getPieceAt,
 } from './board';
-import { PIECE_DEFINITIONS } from './constants';
+import { PIECE_DEFINITIONS } from './configuration';
 import type { Board, Piece, Player, Position } from './types';
 
 export type MoveType = 'move' | 'attack';

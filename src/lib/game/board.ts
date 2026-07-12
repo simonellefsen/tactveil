@@ -3,7 +3,7 @@
  * Pure functions only.
  */
 
-import { BOARD_COLS, BOARD_ROWS, LAKE_POSITIONS } from './constants';
+import { BOARD_COLS, BOARD_ROWS, LAKE_POSITIONS } from './configuration';
 import type { Board, Cell, Piece, PieceType, Player, Position, PublicBoard, PublicPiece } from './types';
 
 export function createEmptyBoard(): Board {
