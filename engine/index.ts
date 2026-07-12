@@ -9,3 +9,4 @@ export * from './board';
 export * from './combat';
 export * from './movement';
 export * from './state';
+export * from './serializer';

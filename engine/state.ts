@@ -14,6 +14,7 @@ import {
 } from './board';
 import { resolveCombat } from './combat';
 import { isLegalAction, getLegalMoves } from './movement';
+import { generateRandomSetup } from './setup';
 import {
   BOARD_COLS,
   BOARD_ROWS,
@@ -195,9 +196,48 @@ export function applyAction(
       return commitSetup(state, action.player);
 
     case 'RANDOMIZE_SETUP': {
-      // Simple placeholder — real auto-setup will be added
-      // For now return unchanged (to be implemented properly with tests)
-      return state;
+      if (state.phase !== 'setup') throw new Error('Can only randomize during setup');
+      if (state.setup[action.player].committed) {
+        throw new Error('Cannot randomize after commit');
+      }
+
+      const rng = createSeededRNG(action.seed ?? state.rngSeed + 1);
+      const randomBoardForPlayer = generateRandomSetup(action.player, rng);
+
+      // Merge the player's pieces into the full board
+      let newBoard = state.board;
+      // Clear existing pieces of this player
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          const p = newBoard[r][c];
+          if (p && p.player === action.player) {
+            newBoard = setPiece(newBoard, { row: r, col: c }, null);
+          }
+        }
+      }
+
+      // Place the randomized pieces
+      for (let r = 0; r < BOARD_ROWS; r++) {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          const p = randomBoardForPlayer[r][c];
+          if (p) {
+            newBoard = setPiece(newBoard, { row: r, col: c }, p);
+          }
+        }
+      }
+
+      return {
+        ...state,
+        board: newBoard,
+        setup: {
+          ...state.setup,
+          [action.player]: {
+            placed: PIECES_PER_PLAYER,
+            committed: state.setup[action.player].committed,
+          },
+        },
+        rngSeed: rng.nextInt(1_000_000_000), // advance seed
+      };
     }
 
     case 'MOVE':
