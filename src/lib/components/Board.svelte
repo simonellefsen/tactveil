@@ -7,14 +7,16 @@
 		selected = null, 
 		onCellClick, 
 		isSetup = false, 
-		currentPlayer 
+		currentPlayer,
+		showAll = false
 	}: { 
 		board: PublicBoard; 
 		legalMoves?: Position[]; 
 		selected?: Position | null; 
 		onCellClick: (pos: Position) => void; 
 		isSetup?: boolean; 
-		currentPlayer: string; 
+		currentPlayer: string;
+		showAll?: boolean;
 	} = $props();
 
 	// Check if position is legal
@@ -30,8 +32,8 @@
 		let cls = 'cell';
 		if (cell) {
 			cls += ` ${cell.player}`;
-			if (cell.type) {
-				cls += ` ${cell.type}`;
+			if (cell.type || showAll) {
+				cls += ` ${cell.type || 'unknown'}`;
 			} else {
 				cls += ' hidden';
 			}
@@ -45,23 +47,25 @@
 
 	function getLabel(cell: any) {
 		if (!cell) return '';
-		if (cell.type) {
-			// Short labels
-			const labels: Record<string, string> = {
-				marshal: 'M',
-				general: 'G',
+		if (cell.type || showAll) {
+			const type = cell.type || 'unknown';
+			// Original-inspired glyphs (text for now, can be SVG later)
+			const glyphs: Record<string, string> = {
+				marshal: '★M', // star for high rank
+				general: '◆G',
 				colonel: 'C',
-				major: 'Maj',
-				captain: 'Cap',
-				lieutenant: 'Lt',
-				sergeant: 'Sgt',
-				miner: 'Min',
-				scout: 'Sc',
-				spy: 'Sp',
-				bomb: 'B',
-				flag: 'F'
+				major: 'M',
+				captain: 'C',
+				lieutenant: 'L',
+				sergeant: 'S',
+				miner: '⛏', // pickaxe
+				scout: '→', // arrow
+				spy: '🗡️',
+				bomb: '💣',
+				flag: '⚑',
+				unknown: '?'
 			};
-			return labels[cell.type] || cell.type[0].toUpperCase();
+			return glyphs[type] || type[0].toUpperCase();
 		}
 		return '?';
 	}
@@ -109,8 +113,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 11px;
-		font-weight: 600;
+		font-size: 13px;
+		font-weight: 700;
 		border: 1px solid #3a414f;
 		background: #1f242e;
 		color: #e8e4d9;
@@ -118,6 +122,21 @@
 		transition: all 0.1s ease;
 		user-select: none;
 		padding: 0;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+	}
+
+	button.cell.red {
+		border-color: #5a3a2a;
+	}
+
+	button.cell.blue {
+		border-color: #2a3a5a;
+	}
+
+	button.cell.hidden {
+		background: #2a2f3a;
+		color: #888;
+		font-style: italic;
 	}
 
 	button.cell:hover:not(:disabled) {

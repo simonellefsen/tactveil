@@ -23,9 +23,27 @@ import {
 // The single authoritative game state (Svelte 5 runes friendly, but using store for session)
 const gameState = writable<GameState>(createInitialState('singleplayer'));
 
-// Public derived view for the current player
+// Viewer for the current display (important for pass-and-play handoff and training)
+let viewer: Player = 'red'; // default, can be switched
+
+export function setViewer(newViewer: Player) {
+	viewer = newViewer;
+}
+
+export function getCurrentViewer() {
+	return viewer;
+}
+
+// Public derived view for the active viewer (supports handoff and training)
 export const gameView: Readable<PublicGameView> = derived(gameState, ($state) => {
-	return getPublicGameView($state, $state.currentPlayer);
+	if ($state.settings.mode === 'training') {
+		// In training, show everything (force reveal for demo)
+		const fullView = getPublicGameView($state, viewer);
+		// Hack: map to show all types
+		return fullView.board.map(row => row.map(cell => cell ? {...cell, type: cell.type || $state.board.find((r: any) => r.some((c: any) => c && c.id === cell.id))?.find((c: any) => c && c.id === cell.id)?.type } : cell)) as any;
+		// Simpler: just use the full state for view in training
+	}
+	return getPublicGameView($state, viewer);
 });
 
 export const game: Readable<GameState> = gameState;

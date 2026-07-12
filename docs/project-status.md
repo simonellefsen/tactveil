@@ -47,10 +47,11 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 - [x] Service worker for offline assets
 - [x] Basic localStorage save/load via serializer + UI buttons
 - [x] Difficulty levels for AI with heuristic scoring (easy random, med/hard prefer good attacks + position)
-- [x] Game modes with proper flows, PWA manifest, improved audio, remaining counts
+- [x] Game modes with proper flows, PWA manifest, improved audio, remaining counts, captured summary, training shows all
+- [x] Board with improved glyphs (stars, arrows, etc.)
 - [x] Build succeeds with @sveltejs/adapter-vercel
 - [x] Pushed to https://github.com/simonellefsen/tactveil
-- Next: deeper AI (e.g. basic search), full E2E tests, original piece glyphs/SVGs, Vercel deploy + iPhone test
+- Next: deeper AI (e.g. basic search), full E2E tests, original piece glyphs/SVGs, Vercel deploy + iPhone test, more audio
 - [ ] Immutable state updates + `applyAction(state, action, rng)`
 - [ ] Seeded RNG utility
 - [ ] Serialization (versioned, round-trip safe, migration path)

@@ -3,7 +3,7 @@
 	import Handoff from '$lib/components/Handoff.svelte';
 	import CombatModal from '$lib/components/CombatModal.svelte';
 	import Victory from '$lib/components/Victory.svelte';
-	import { gameView, game, dispatch, randomizeSetup, commitSetup, resetGame, makeRandomLegalMove, makeAIMove, saveGame, loadGame } from '$lib/stores/game';
+	import { gameView, game, dispatch, randomizeSetup, commitSetup, resetGame, makeRandomLegalMove, makeAIMove, saveGame, loadGame, setViewer, getCurrentViewer } from '$lib/stores/game';
 	import { initAudio, playMoveSound, playCombatSound, playSelectSound, playInvalidSound } from '$lib/audio';
 	import type { Player, Position, PieceType } from '$lib/game';
 
@@ -14,8 +14,16 @@
 	let mode: 'single' | 'passplay' | 'training' = $state('single');
 	let difficulty: 'easy' | 'medium' | 'hard' = $state('easy');
 	let gameStarted = $state(false);
+	let currentViewPlayer: Player = $state('red');
 
 	const pieceTypes: PieceType[] = ['flag', 'marshal', 'general', 'colonel', 'major', 'captain', 'lieutenant', 'sergeant', 'miner', 'scout', 'spy', 'bomb'];
+
+	// Sync viewer
+	$effect(() => {
+		if (gameStarted) {
+			setViewer(currentViewPlayer);
+		}
+	});
 
 	function remainingCount(type: PieceType, player: Player) {
 		let count = 0;
@@ -28,6 +36,28 @@
 		// rough counts from rules
 		const maxes: Record<PieceType, number> = {flag:1, marshal:1, general:1, colonel:2, major:3, captain:4, lieutenant:4, sergeant:4, miner:5, scout:8, spy:1, bomb:6};
 		return Math.max(0, (maxes[type] || 1) - count);
+	}
+
+	function getCaptured() {
+		// Simple: pieces not on board for the opponent (from initial, but demo uses revealed + missing)
+		const captured: any[] = [];
+		const initialCounts: Record<PieceType, number> = {flag:1, marshal:1, general:1, colonel:2, major:3, captain:4, lieutenant:4, sergeant:4, miner:5, scout:8, spy:1, bomb:6};
+		const currentCounts: Record<PieceType, number> = {} as any;
+		Object.keys(initialCounts).forEach(t => currentCounts[t as PieceType] = 0);
+
+		$game.board.forEach(row => row.forEach(cell => {
+			if (cell) currentCounts[cell.type]++;
+		}));
+
+		// For opponent of current
+		const opp = $game.currentPlayer === 'red' ? 'blue' : 'red';
+		Object.keys(initialCounts).forEach((t: any) => {
+			const missing = initialCounts[t] - currentCounts[t];
+			for (let i=0; i<missing; i++) {
+				captured.push({type: t, player: opp});
+			}
+		});
+		return captured;
 	}
 
 	// Track last combat for modal
@@ -146,6 +176,12 @@
 	function handleReady() {
 		showHandoff = false;
 		selected = null;
+		// Switch viewer for passplay
+		if (mode === 'passplay') {
+			const nextViewer = currentViewPlayer === 'red' ? 'blue' : 'red';
+			setViewer(nextViewer);
+			currentViewPlayer = nextViewer;
+		}
 		addLog('Player ready. Your turn.');
 	}
 
@@ -218,8 +254,11 @@
 
 		{#if $game.phase === 'playing'}
 			<div class="captured">
-				<strong>Captured summary:</strong> High-value pieces lost by opponent shown as revealed or missing on board.
-				<!-- For full list, track in engine history in future -->
+				<strong>Captured:</strong> 
+				{#each getCaptured() as cap}
+					<span class="cap-item {cap.player}">{cap.type}</span>
+				{/each}
+				<span class="hint">(revealed or eliminated)</span>
 			</div>
 		{/if}
 
@@ -258,6 +297,7 @@
 				onCellClick={handleCellClick}
 				isSetup={$game.phase === 'setup'}
 				currentPlayer={$game.currentPlayer}
+				showAll={mode === 'training'}
 			/>
 		</div>
 
@@ -362,6 +402,24 @@
 		max-height: 80px;
 		overflow: auto;
 	}
+
+	.captured {
+		margin: 0.5rem 0;
+		font-size: 0.8rem;
+	}
+
+	.cap-item {
+		display: inline-block;
+		margin: 0 2px;
+		padding: 1px 3px;
+		border-radius: 2px;
+		font-size: 0.7rem;
+	}
+
+	.cap-item.red { background: #5a3a2a; }
+	.cap-item.blue { background: #2a3a5a; }
+
+	.hint { font-size: 0.7rem; color: #666; margin-left: 4px; }
 
 	.winner { color: #5a8a5a; font-weight: bold; }
 
