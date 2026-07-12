@@ -87,9 +87,69 @@ export function makeRandomLegalMove() {
 	});
 }
 
-// Simple AI move (for single player easy mode)
-export function makeAIMove() {
-	makeRandomLegalMove();
+// AI move with difficulty levels
+export function makeAIMove(difficulty: 'easy' | 'medium' | 'hard' = 'easy') {
+	const current = get(gameState);
+	if (current.phase !== 'playing') return;
+
+	const player = current.currentPlayer;
+	const candidates: Array<{ from: Position; to: Position; isAttack: boolean; score: number }> = [];
+
+	for (let r = 0; r < 10; r++) {
+		for (let c = 0; c < 10; c++) {
+			const from: Position = { row: r, col: c };
+			const piece = current.board[r][c];
+			if (piece && piece.player === player) {
+				const legal = getLegalMoves(current.board, from, player);
+				for (const m of legal) {
+					const target = current.board[m.to.row][m.to.col];
+					const isAttack = !!target && target.player !== player;
+
+					let score = 0;
+					if (difficulty !== 'easy') {
+						// Basic scoring
+						if (isAttack && target) {
+							const attackerRank = getPieceRank(piece.type);
+							const defenderRank = getPieceRank(target.type);
+							if (attackerRank > defenderRank || (piece.type === 'miner' && target.type === 'bomb') || (piece.type === 'spy' && target.type === 'marshal')) {
+								score += 10 + (defenderRank || 0); // prefer high value targets
+							} else {
+								score -= 5; // risky
+							}
+						}
+						// Prefer forward movement roughly
+						score += (player === 'red' ? m.to.row - from.row : from.row - m.to.row) * 0.5;
+					}
+
+					candidates.push({ from, to: m.to, isAttack, score });
+				}
+			}
+		}
+	}
+
+	if (candidates.length === 0) return;
+
+	let choice;
+	if (difficulty === 'easy' || candidates.length === 1) {
+		choice = candidates[Math.floor(Math.random() * candidates.length)];
+	} else {
+		// Pick best score, with some randomness for medium
+		candidates.sort((a, b) => b.score - a.score);
+		const top = difficulty === 'hard' ? 1 : 3;
+		choice = candidates[Math.floor(Math.random() * Math.min(top, candidates.length))];
+	}
+
+	const action = choice.isAttack
+		? ({ type: 'ATTACK', from: choice.from, to: choice.to } as Action)
+		: ({ type: 'MOVE', from: choice.from, to: choice.to } as Action);
+
+	const rng = createSeededRNG(current.rngSeed + 1);
+	gameState.update(() => applyAction(current, action, rng));
+}
+
+function getPieceRank(type: any): number {
+	const ranks: any = { marshal:10, general:9, colonel:8, major:7, captain:6, lieutenant:5, sergeant:4, miner:3, scout:2, spy:1, bomb:0, flag:0 };
+	return ranks[type] || 0;
 }
 
 // For pass-and-play: after move, game is ready for handoff

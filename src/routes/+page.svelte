@@ -3,7 +3,7 @@
 	import Handoff from '$lib/components/Handoff.svelte';
 	import CombatModal from '$lib/components/CombatModal.svelte';
 	import Victory from '$lib/components/Victory.svelte';
-	import { gameView, game, dispatch, randomizeSetup, commitSetup, resetGame, makeRandomLegalMove, makeAIMove } from '$lib/stores/game';
+	import { gameView, game, dispatch, randomizeSetup, commitSetup, resetGame, makeRandomLegalMove, makeAIMove, saveGame, loadGame } from '$lib/stores/game';
 	import { initAudio, playMoveSound, playCombatSound, playSelectSound, playInvalidSound } from '$lib/audio';
 	import type { Player, Position, PieceType } from '$lib/game';
 
@@ -12,6 +12,7 @@
 	let selectedPieceType: PieceType | null = $state(null);
 	let showHandoff = $state(false);
 	let mode: 'single' | 'passplay' | 'training' = $state('single');
+	let difficulty: 'easy' | 'medium' | 'hard' = $state('easy');
 	let gameStarted = $state(false);
 
 	const pieceTypes: PieceType[] = ['flag', 'marshal', 'general', 'colonel', 'major', 'captain', 'lieutenant', 'sergeant', 'miner', 'scout', 'spy', 'bomb'];
@@ -23,15 +24,16 @@
 		log = [msg, ...log].slice(0, 6);
 	}
 
-	function startGame(selectedMode: 'single' | 'passplay' | 'training') {
+	function startGame(selectedMode: 'single' | 'passplay' | 'training', diff?: 'easy' | 'medium' | 'hard') {
 		mode = selectedMode;
+		if (diff) difficulty = diff;
 		gameStarted = true;
 		resetGame();
 		initAudio();
 		selected = null;
 		selectedPieceType = null;
 		showHandoff = false;
-		addLog(`Started ${selectedMode} game`);
+		addLog(`Started ${selectedMode} ${mode === 'single' ? difficulty : ''} game`);
 	}
 
 	function handleCellClick(pos: Position) {
@@ -75,7 +77,7 @@
 				// After move in single player, AI responds
 				if (mode === 'single' && state.currentPlayer !== 'red') {
 					setTimeout(() => {
-						makeAIMove();
+						makeAIMove(difficulty);
 						playMoveSound();
 						addLog('AI moved');
 					}, 600);
@@ -142,7 +144,7 @@
 
 		if (mode === 'single' && $game.currentPlayer !== 'red') {
 			setTimeout(() => {
-				makeAIMove();
+				makeAIMove(difficulty);
 				playMoveSound();
 				addLog('AI moved');
 			}, 500);
@@ -181,11 +183,15 @@
 		<div class="start-screen">
 			<h2>Choose Game Mode</h2>
 			<div class="modes">
-				<button on:click={() => startGame('single')}>Single Player vs AI (Easy)</button>
-				<button on:click={() => startGame('passplay')}>Local Pass-and-Play</button>
-				<button on:click={() => startGame('training')}>Training (All Visible)</button>
+				<div class="mode-group">
+					<button on:click={() => startGame('single', 'easy')}>Single Player - Easy AI</button>
+					<button on:click={() => startGame('single', 'medium')}>Single Player - Medium AI</button>
+					<button on:click={() => startGame('single', 'hard')}>Single Player - Hard AI</button>
+				</div>
+				<button on:click={() => startGame('passplay')}>Local Pass-and-Play (2 players)</button>
+				<button on:click={() => startGame('training')}>Training Mode (All Visible)</button>
 			</div>
-			<p class="hint">Rules enforced by pure engine. No hidden info leaks.</p>
+			<p class="hint">Rules enforced by pure engine. No hidden info leaks. Original design.</p>
 		</div>
 	{:else}
 		<div class="status-bar">
@@ -217,6 +223,8 @@
 		{:else if $game.phase === 'playing'}
 			<div class="play-actions">
 				<button on:click={handleRandomMove}>Random Move</button>
+				<button on:click={() => { saveGame(); addLog('Game saved locally'); }}>Save</button>
+				<button on:click={() => { if (loadGame()) addLog('Game loaded'); else addLog('No save'); }}>Load</button>
 				<button on:click={handleReset}>Reset</button>
 			</div>
 		{/if}

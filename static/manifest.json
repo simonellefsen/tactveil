@@ -1,0 +1,16 @@
+{
+  "name": "Tactveil",
+  "short_name": "Tactveil",
+  "description": "Modern hidden-information strategy game. Play offline on desktop or iPhone.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0d12",
+  "theme_color": "#2b6e63",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
