@@ -216,6 +216,14 @@
 			{/if}
 		</div>
 
+		{#if $game.phase === 'playing'}
+			<div class="captured">
+				<strong>Captured:</strong> 
+				Red has captured some of Blue's forces (see board for revealed).
+				<!-- Simple: high value lost if not present -->
+			</div>
+		{/if}
+
 		{#if $game.phase === 'setup'}
 			<div class="setup-ui">
 				<h3>Setup Phase — Select type then click your side of the board</h3>
