@@ -332,7 +332,7 @@ export function createSeededRNG(seed: number): RNG {
 - Versioning: `state.version` + top-level `SavedGame.version`.
 - Migrations live in `persistence/migrations.ts` (array of `(data) => data` fns).
 - Replay format: minimal — initial seed + sequence of actions (very compact). Can reconstruct any intermediate state.
-- Storage keying: `stratego:saved:<id>`, `stratego:replays:<id>`.
+- Storage keying: `tactveil:saved:<id>`, `tactveil:replays:<id>`.
 - Validation on load: shape checks + engine invariants (e.g. exactly 40 pieces per side at setup end). On failure → start fresh game + warn user.
 - Compression: Optional (lz-string or native) for large replays, but keep simple first.
 

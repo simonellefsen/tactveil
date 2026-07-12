@@ -4,8 +4,8 @@ Modern hidden-information strategy game. Pure client-side. Works offline. Instal
 
 Inspired by classic 10x10 tactics games with hidden ranks, but fully original in design, visuals, and implementation.
 
-**Repository:** https://github.com/simonellefsen/stratego  
-**Demo domain:** stratego-ochre.vercel.app (will be updated to tactveil-*.vercel.app)
+**Repository:** https://github.com/simonellefsen/tactveil  
+**Live demo:** https://tactveil.vercel.app (or the latest deployment from the repo)
 
 ## Tech
 

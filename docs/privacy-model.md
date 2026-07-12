@@ -109,9 +109,9 @@ The rendered output (DOM, React fiber/props/context, ARIA, CSS, console, storage
   ```
 - **No URL / history leakage**: State never serialized into `location.hash`, query params, or `history.pushState` payloads. Opaque game ids only if deep-linking public replays.
 - **No localStorage / IndexedDB key leakage**: Keys are opaque and generic:
-  - `stratego:v1:settings`
-  - `stratego:v1:game-index`
-  - `stratego:v1:game:abc123`
+  - `tactveil:v1:settings`
+  - `tactveil:v1:game-index`
+  - `tactveil:v1:game:abc123`
   Never keys like `currentEnemyRanks` or values that embed raw concealed maps.
 - **No React / component tree leakage**: Never pass `FullGameState` or raw piece lists with hidden types down as props or via context. Only `PlayerView` (or a minimal subset) reaches components. Use `Object.freeze` + defensive copying on views in production.
 - **No visual differentiation of unknowns**: All unrevealed opponent pieces must render identically (same back graphic per owner). No subtle CSS, size, or animation differences that could encode identity.
@@ -227,7 +227,7 @@ This protocol ensures that when the device changes hands, the new player sees on
 - May expose "Reveal all" (or god-mode board) using a separate projector or direct full state access, but only when `mode === 'training'`.
 - Allows peeking at setup, step-by-step combat simulation with identities shown, AI explanations.
 - Games are tagged `mode: 'training'`.
-- Storage uses isolated namespace or flag (`stratego:v1:training-games:...`).
+- Storage uses isolated namespace or flag (`tactveil:v1:training-games:...`).
 - Full-state exports are permitted (with explicit warning banners).
 - Switching modes requires starting a new game; existing real games cannot be converted to training mid-play.
 
