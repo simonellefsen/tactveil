@@ -1,12 +1,21 @@
 <script lang="ts">
 	import type { PublicBoard, Position, GameState } from '$lib/game';
 
-	export let board: PublicBoard;
-	export let legalMoves: Position[] = [];
-	export let selected: Position | null = null;
-	export let onCellClick: (pos: Position) => void;
-	export let isSetup: boolean = false;
-	export let currentPlayer: string;
+	let { 
+		board, 
+		legalMoves = [], 
+		selected = null, 
+		onCellClick, 
+		isSetup = false, 
+		currentPlayer 
+	}: { 
+		board: PublicBoard; 
+		legalMoves?: Position[]; 
+		selected?: Position | null; 
+		onCellClick: (pos: Position) => void; 
+		isSetup?: boolean; 
+		currentPlayer: string; 
+	} = $props();
 
 	// Check if position is legal
 	function isLegal(pos: Position): boolean {

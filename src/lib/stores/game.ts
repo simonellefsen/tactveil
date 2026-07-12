@@ -85,3 +85,11 @@ export function makeRandomLegalMove() {
 	});
 }
 
+// Simple AI move (for single player easy mode)
+export function makeAIMove() {
+	makeRandomLegalMove();
+}
+
+// For pass-and-play: after move, game is ready for handoff
+// The UI will show handoff overlay before next player acts.
+

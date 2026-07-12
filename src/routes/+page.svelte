@@ -1,71 +1,100 @@
 <script lang="ts">
 	import Board from '$lib/components/Board.svelte';
-	import { gameView, game, dispatch, randomizeSetup, commitSetup, resetGame } from '$lib/stores/game';
-	import { getLegalMoves } from '$lib/game';
+	import Handoff from '$lib/components/Handoff.svelte';
+	import CombatModal from '$lib/components/CombatModal.svelte';
+	import Victory from '$lib/components/Victory.svelte';
+	import { gameView, game, dispatch, randomizeSetup, commitSetup, resetGame, makeRandomLegalMove, makeAIMove } from '$lib/stores/game';
+	import { initAudio, playMoveSound, playCombatSound, playSelectSound, playInvalidSound } from '$lib/audio';
 	import type { Player, Position, PieceType } from '$lib/game';
 
 	let log: string[] = $state([]);
 	let selected: Position | null = $state(null);
 	let selectedPieceType: PieceType | null = $state(null);
-	let currentViewPlayer: Player = $state('red'); // for demo, can switch for handoff simulation
+	let showHandoff = $state(false);
+	let mode: 'single' | 'passplay' | 'training' = $state('single');
+	let gameStarted = $state(false);
 
 	const pieceTypes: PieceType[] = ['flag', 'marshal', 'general', 'colonel', 'major', 'captain', 'lieutenant', 'sergeant', 'miner', 'scout', 'spy', 'bomb'];
 
+	// Track last combat for modal
+	let lastCombat = $derived($game.lastCombat);
+
 	function addLog(msg: string) {
-		log = [msg, ...log].slice(0, 8);
+		log = [msg, ...log].slice(0, 6);
+	}
+
+	function startGame(selectedMode: 'single' | 'passplay' | 'training') {
+		mode = selectedMode;
+		gameStarted = true;
+		resetGame();
+		initAudio();
+		selected = null;
+		selectedPieceType = null;
+		showHandoff = false;
+		addLog(`Started ${selectedMode} game`);
 	}
 
 	function handleCellClick(pos: Position) {
 		const state = $game;
 		const cell = state.board[pos.row][pos.col];
+		playSelectSound();
 
 		if (state.phase === 'setup') {
+			const player = state.currentPlayer; // for simplicity in demo
 			if (selectedPieceType) {
 				try {
-					dispatch({
-						type: 'PLACE_PIECE',
-						player: currentViewPlayer,
-						position: pos,
-						pieceType: selectedPieceType
-					});
-					addLog(`Placed ${selectedPieceType} for ${currentViewPlayer}`);
-					// Auto deselect after place? or keep for multiple
+					dispatch({ type: 'PLACE_PIECE', player, position: pos, pieceType: selectedPieceType });
+					addLog(`Placed ${selectedPieceType}`);
 				} catch (e: any) {
+					playInvalidSound();
 					addLog(`Error: ${e.message}`);
 				}
-			} else if (cell && cell.player === currentViewPlayer) {
-				// Remove piece
+			} else if (cell && cell.player === player) {
 				try {
-					dispatch({ type: 'REMOVE_PIECE', player: currentViewPlayer, position: pos });
-					addLog(`Removed piece at ${pos.row},${pos.col}`);
+					dispatch({ type: 'REMOVE_PIECE', player, position: pos });
+					addLog(`Removed piece`);
 				} catch (e: any) {
+					playInvalidSound();
 					addLog(`Error: ${e.message}`);
 				}
 			}
 			return;
 		}
 
-		// Playing phase
+		if (state.phase !== 'playing') return;
+
 		if (selected) {
-			// Try to move/attack
 			const isAttack = !!cell && cell.player !== state.currentPlayer;
 			const actionType = isAttack ? 'ATTACK' : 'MOVE';
 			try {
-				dispatch({
-					type: actionType,
-					from: selected,
-					to: pos
-				} as any);
-				addLog(`${actionType.toLowerCase()} from ${selected.row},${selected.col} to ${pos.row},${pos.col}`);
+				dispatch({ type: actionType, from: selected, to: pos } as any);
+				playMoveSound();
+				addLog(`${actionType.toLowerCase()}`);
 				selected = null;
+
+				// After move in single player, AI responds
+				if (mode === 'single' && state.currentPlayer !== 'red') {
+					setTimeout(() => {
+						makeAIMove();
+						playMoveSound();
+						addLog('AI moved');
+					}, 600);
+				}
+
+				// In passplay, trigger handoff after successful move
+				if (mode === 'passplay') {
+					setTimeout(() => {
+						showHandoff = true;
+					}, 400);
+				}
 			} catch (e: any) {
+				playInvalidSound();
 				addLog(`Illegal: ${e.message}`);
 				selected = null;
 			}
 		} else if (cell && cell.player === state.currentPlayer) {
-			// Select own piece
 			selected = pos;
-			addLog(`Selected piece at ${pos.row},${pos.col}`);
+			playSelectSound();
 		} else {
 			selected = null;
 		}
@@ -80,7 +109,11 @@
 	function handleCommit(player: Player) {
 		try {
 			commitSetup(player);
-			addLog(`${player} committed setup`);
+			addLog(`${player} committed`);
+			if (mode === 'passplay' && player === 'blue') {
+				// After both commit in passplay, start with handoff
+				setTimeout(() => showHandoff = true, 300);
+			}
 		} catch (e: any) {
 			addLog(`Error: ${e.message}`);
 		}
@@ -91,234 +124,222 @@
 		log = ['Game reset'];
 		selected = null;
 		selectedPieceType = null;
+		showHandoff = false;
+		gameStarted = false;
+	}
+
+	function handleReady() {
+		showHandoff = false;
+		selected = null;
+		addLog('Player ready. Your turn.');
 	}
 
 	function handleRandomMove() {
-		const state = $game;
-		if (state.phase !== 'playing') return;
+		if ($game.phase !== 'playing') return;
+		makeRandomLegalMove();
+		playMoveSound();
+		addLog('Random move');
 
-		for (let r = 0; r < 10; r++) {
-			for (let c = 0; c < 10; c++) {
-				const from = { row: r, col: c };
-				const p = state.board[r][c];
-				if (p && p.player === state.currentPlayer) {
-					const legals = getLegalForDemo(state, from);
-					if (legals.length) {
-						const to = legals[0];
-						const isAttack = !!state.board[to.row][to.col];
-						try {
-							dispatch({ type: isAttack ? 'ATTACK' : 'MOVE', from, to } as any);
-							addLog(`Random ${isAttack ? 'attack' : 'move'}`);
-							return;
-						} catch {}
-					}
-				}
-			}
+		if (mode === 'single' && $game.currentPlayer !== 'red') {
+			setTimeout(() => {
+				makeAIMove();
+				playMoveSound();
+				addLog('AI moved');
+			}, 500);
 		}
-		addLog('No legal moves found');
-	}
-
-	function simulateHandoff() {
-		if ($game.phase !== 'playing') {
-			addLog('Handoff only during play');
-			return;
-		}
-		// Simulate privacy handoff: switch view player
-		currentViewPlayer = currentViewPlayer === 'red' ? 'blue' : 'red';
-		selected = null;
-		addLog(`Device handed to ${currentViewPlayer}. View switched (privacy preserved).`);
 	}
 
 	function selectPieceType(type: PieceType) {
 		selectedPieceType = selectedPieceType === type ? null : type;
 		selected = null;
-		addLog(selectedPieceType ? `Selected ${type} for placement` : 'Placement mode off');
 	}
 
-	// Computed legals for display (runes mode)
+	// Combat sound on change
+	$effect(() => {
+		if (lastCombat) {
+			const win = lastCombat.outcome === 'attackerWins' || lastCombat.outcome === 'defenderBombDefused';
+			playCombatSound(win);
+		}
+	});
+
 	let legals = $derived.by(() => {
 		if (!selected) return [];
 		const state = $game;
 		try {
 			return getLegalMoves(state.board, selected, state.currentPlayer).map((m: any) => m.to);
-		} catch { 
-			return []; 
-		}
-	});
-
-	// For random move in demo (uses imported getLegalMoves)
-	function getLegalForDemo(state: any, from: any) {
-		try {
-			return getLegalMoves(state.board, from, state.currentPlayer).map((m: any) => m.to);
 		} catch { return []; }
-	}
+	});
 </script>
 
 <div class="app">
 	<header>
 		<h1>Tactveil</h1>
-		<p class="subtitle">Hidden tactics • Client-only • Offline PWA</p>
+		<p class="subtitle">Modern hidden-information strategy • Client-only PWA</p>
 	</header>
 
-	<div class="status-bar">
-		<div class="phase">Phase: <strong>{$game.phase}</strong></div>
-		<div class="turn">Turn: <strong>{$game.currentPlayer}</strong> (viewing as <strong>{currentViewPlayer}</strong>)</div>
-		<div class="setup-count">
-			Red: {$game.setup.red.placed}/40 { $game.setup.red.committed ? '✓' : '' } |
-			Blue: {$game.setup.blue.placed}/40 { $game.setup.blue.committed ? '✓' : '' }
-		</div>
-		{#if $game.winner}
-			<div class="winner">🏆 Winner: {$game.winner}</div>
-		{/if}
-		{#if $game.lastCombat}
-			<div class="combat">Last combat: {$game.lastCombat.attacker.type} vs {$game.lastCombat.defender.type} → {$game.lastCombat.outcome}</div>
-		{/if}
-	</div>
-
-	{#if $game.phase === 'setup'}
-		<div class="setup-controls">
-			<h3>Setup — Click palette then board square</h3>
-			<div class="palette">
-				{#each pieceTypes as type}
-					<button 
-						class="piece-btn" 
-						class:selected={selectedPieceType === type}
-						on:click={() => selectPieceType(type)}
-					>
-						{type}
-					</button>
-				{/each}
+	{#if !gameStarted}
+		<div class="start-screen">
+			<h2>Choose Game Mode</h2>
+			<div class="modes">
+				<button on:click={() => startGame('single')}>Single Player vs AI (Easy)</button>
+				<button on:click={() => startGame('passplay')}>Local Pass-and-Play</button>
+				<button on:click={() => startGame('training')}>Training (All Visible)</button>
 			</div>
-			<div class="quick">
-				<button on:click={() => handleRandomize('red')}>Random Red</button>
-				<button on:click={() => handleRandomize('blue')}>Random Blue</button>
-				<button on:click={() => handleCommit('red')} disabled={$game.setup.red.committed}>Commit Red</button>
-				<button on:click={() => handleCommit('blue')} disabled={$game.setup.blue.committed}>Commit Blue</button>
+			<p class="hint">Rules enforced by pure engine. No hidden info leaks.</p>
+		</div>
+	{:else}
+		<div class="status-bar">
+			<div>Mode: <strong>{mode}</strong></div>
+			<div>Phase: <strong>{$game.phase}</strong></div>
+			<div>Turn: <strong>{$game.currentPlayer}</strong></div>
+			{#if $game.winner}
+				<div class="winner">Winner: {$game.winner}</div>
+			{/if}
+		</div>
+
+		{#if $game.phase === 'setup'}
+			<div class="setup-ui">
+				<h3>Setup Phase — Select type then click your side of the board</h3>
+				<div class="palette">
+					{#each pieceTypes as type}
+						<button class:selected={selectedPieceType === type} on:click={() => selectPieceType(type)}>
+							{type}
+						</button>
+					{/each}
+				</div>
+				<div class="actions">
+					<button on:click={() => handleRandomize('red')}>Random Red</button>
+					<button on:click={() => handleRandomize('blue')}>Random Blue</button>
+					<button on:click={() => handleCommit('red')} disabled={$game.setup.red.committed}>Commit Red</button>
+					<button on:click={() => handleCommit('blue')} disabled={$game.setup.blue.committed}>Commit Blue</button>
+				</div>
 			</div>
-		</div>
-	{:else if $game.phase === 'playing'}
-		<div class="play-controls">
-			<button on:click={handleRandomMove}>Random Legal Move</button>
-			<button on:click={simulateHandoff}>Simulate Handoff (Pass Device)</button>
-		</div>
-	{/if}
+		{:else if $game.phase === 'playing'}
+			<div class="play-actions">
+				<button on:click={handleRandomMove}>Random Move</button>
+				<button on:click={handleReset}>Reset</button>
+			</div>
+		{/if}
 
-	<div class="main">
-		<Board 
-			board={$gameView.board} 
-			legalMoves={legals}
-			{selected}
-			onCellClick={handleCellClick}
-			isSetup={$game.phase === 'setup'}
-			currentPlayer={currentViewPlayer}
-		/>
-	</div>
+		<div class="board-container">
+			<Board 
+				board={$gameView.board} 
+				legalMoves={legals}
+				{selected}
+				onCellClick={handleCellClick}
+				isSetup={$game.phase === 'setup'}
+				currentPlayer={$game.currentPlayer}
+			/>
+		</div>
 
-	<div class="sidebar">
 		<div class="log">
-			<h4>Log</h4>
 			{#each log as entry}
 				<div>{entry}</div>
 			{/each}
 		</div>
+	{/if}
 
-		<button on:click={handleReset} class="reset">Reset Game</button>
-	</div>
+	<CombatModal combat={lastCombat} onClose={() => { /* auto closes */ }} />
+	<Victory winner={$game.winner} onReset={handleReset} />
+
+	{#if showHandoff}
+		<Handoff currentPlayer={$game.currentPlayer} onReady={handleReady} />
+	{/if}
 
 	<footer>
-		<small>Pure engine • No hidden info leaks • SvelteKit</small>
+		<small>Pure engine in lib/game • No leaks • SvelteKit</small>
 	</footer>
 </div>
 
 <style>
 	.app {
-		max-width: 860px;
+		max-width: 820px;
 		margin: 0 auto;
 		padding: 1rem;
-		font-family: system-ui, -apple-system, sans-serif;
-		background: #0f1218;
+		background: #0a0d12;
 		color: #e8e4d9;
 		min-height: 100vh;
+		font-family: system-ui, sans-serif;
 	}
 
-	header h1 { margin: 0; font-size: 2.2rem; letter-spacing: 1px; }
-	.subtitle { margin: 0.25rem 0 1rem; color: #888; font-size: 0.95rem; }
+	header h1 { font-size: 2rem; margin: 0; }
+	.subtitle { margin-top: 0; color: #888; }
+
+	.start-screen {
+		text-align: center;
+		margin-top: 3rem;
+	}
+
+	.modes button {
+		display: block;
+		width: 100%;
+		max-width: 320px;
+		margin: 0.5rem auto;
+		padding: 0.8rem;
+		background: #2a2f3a;
+		border: 1px solid #3a414f;
+		color: #e8e4d9;
+		cursor: pointer;
+	}
 
 	.status-bar {
 		display: flex;
 		gap: 1rem;
-		flex-wrap: wrap;
 		background: #1a1f2a;
-		padding: 0.5rem 0.75rem;
-		border-radius: 4px;
+		padding: 0.4rem 0.6rem;
 		margin-bottom: 1rem;
-		font-size: 0.9rem;
+		font-size: 0.85rem;
+		flex-wrap: wrap;
 	}
 
-	.setup-controls, .play-controls {
+	.setup-ui, .play-actions {
 		margin-bottom: 1rem;
 	}
 
 	.palette {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 4px;
+		gap: 3px;
 		margin-bottom: 0.5rem;
 	}
 
-	.piece-btn {
-		padding: 4px 8px;
-		font-size: 11px;
-		border: 1px solid #444;
+	.palette button {
+		padding: 3px 6px;
+		font-size: 10px;
 		background: #222;
+		border: 1px solid #444;
 		color: #ddd;
-		cursor: pointer;
 	}
 
-	.piece-btn.selected {
+	.palette button.selected {
 		background: #3a5a3a;
 		border-color: #5a8a5a;
 	}
 
-	.quick button { margin-right: 4px; }
-
-	button {
-		padding: 6px 10px;
-		border: 1px solid #555;
-		background: #2a2f3a;
-		color: #e8e4d9;
-		cursor: pointer;
-		font-size: 0.85rem;
+	.actions button {
+		margin-right: 4px;
+		padding: 4px 8px;
 	}
 
-	button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-	.main { margin: 1rem 0; }
-
-	.sidebar {
-		margin-top: 1rem;
+	.board-container {
+		margin: 1rem 0;
 	}
 
 	.log {
 		background: #1a1f2a;
-		padding: 0.5rem;
-		border-radius: 3px;
-		font-size: 0.8rem;
-		line-height: 1.3;
-		max-height: 140px;
+		padding: 0.4rem;
+		font-size: 0.75rem;
+		line-height: 1.2;
+		max-height: 80px;
 		overflow: auto;
-		margin-bottom: 0.5rem;
 	}
 
-	.reset {
-		background: #4a2f2a;
-		border-color: #6a4f4a;
-	}
+	.winner { color: #5a8a5a; font-weight: bold; }
 
 	footer {
 		margin-top: 2rem;
-		opacity: 0.6;
-		font-size: 0.75rem;
 		text-align: center;
+		opacity: 0.5;
+		font-size: 0.7rem;
 	}
 </style>

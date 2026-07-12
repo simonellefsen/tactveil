@@ -40,10 +40,13 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 - [x] RANDOMIZE_SETUP implemented with seeded generator
 - [x] Versioned serialization (serialize/deserialize + replay export)
 - [x] Unit tests passing (engine logic)
-- [x] Interactive Svelte UI: CSS Grid board, piece palette for setup, click-to-select and move/attack, handoff simulation, public view masking
-- [x] Proper component structure (Board.svelte)
+- [x] Interactive Svelte UI: CSS Grid board with selection/legal highlights, setup palette, full move/attack, modes (single/passplay/training), handoff overlay, combat modal, victory screen
+- [x] Components: Board.svelte, Handoff.svelte, CombatModal.svelte, Victory.svelte
+- [x] Basic audio (Web Audio beeps for actions/combat)
+- [x] Simple AI for single player (random legal after human move)
 - [x] Service worker for offline assets
 - [x] Build succeeds with @sveltejs/adapter-vercel
+- [x] Pushed to https://github.com/simonellefsen/tactveil
 - [ ] Board model + lake/position utilities implemented and unit-tested
 - [ ] Legal move generator for every piece type (including Scout pathing)
 - [ ] Combat resolution (exact priority algorithm from rules) implemented + exhaustive tests
