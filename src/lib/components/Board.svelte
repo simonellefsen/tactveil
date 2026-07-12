@@ -113,30 +113,61 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 13px;
+		font-size: 14px;
 		font-weight: 700;
-		border: 1px solid #3a414f;
+		border: 2px solid #3a414f;
 		background: #1f242e;
 		color: #e8e4d9;
 		cursor: pointer;
 		transition: all 0.1s ease;
 		user-select: none;
 		padding: 0;
-		box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+		box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.3);
+		position: relative;
 	}
 
 	button.cell.red {
 		border-color: #5a3a2a;
+		background: #2a2520;
 	}
 
 	button.cell.blue {
 		border-color: #2a3a5a;
+		background: #20252f;
+	}
+
+	/* Owner indicator without relying only on color (per accessibility) */
+	button.cell.red::after {
+		content: '';
+		position: absolute;
+		bottom: 2px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 12px;
+		height: 2px;
+		background: #a07050;
+	}
+
+	button.cell.blue::after {
+		content: '';
+		position: absolute;
+		bottom: 2px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 12px;
+		height: 2px;
+		background: #5070a0;
 	}
 
 	button.cell.hidden {
 		background: #2a2f3a;
 		color: #888;
 		font-style: italic;
+		border-style: dashed;
+	}
+
+	button.cell.hidden::after {
+		display: none;
 	}
 
 	button.cell:hover:not(:disabled) {

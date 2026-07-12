@@ -29,34 +29,22 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 
 **Started:** 2026-07-12 after user confirmation of Phase 1 specs.
 
-- [x] Next.js 16 project initialized (App Router, TS strict, Tailwind, ESLint)
-- [x] Vitest configured for pure engine tests
-- [x] Domain types (`Piece`, `Position`, `GameState`, `Action`, `CombatResult`, etc.) defined in `engine/types.ts`
-- [x] Board model + lake/position utilities (engine/board.ts)
-- [x] Legal move generator for standard pieces + Scout (engine/movement.ts)
-- [x] Exact combat resolution algorithm (engine/combat.ts)
-- [x] Setup placement, commit, applyAction reducer, public view projection (engine/state.ts)
-- [x] Seeded RNG (mulberry32 style) for determinism
-- [x] RANDOMIZE_SETUP implemented with seeded generator
-- [x] Versioned serialization (serialize/deserialize + replay export)
-- [x] Unit tests passing (engine logic)
-- [x] Interactive Svelte UI: CSS Grid board with selection/legal highlights, setup palette, full move/attack, modes (single/passplay/training), handoff overlay, combat modal, victory screen
-- [x] Components: Board.svelte, Handoff.svelte, CombatModal.svelte, Victory.svelte
-- [x] Basic audio (Web Audio beeps for actions/combat)
-- [x] Simple AI for single player (random legal after human move)
-- [x] Service worker for offline assets
-- [x] Basic localStorage save/load via serializer + UI buttons
-- [x] Difficulty levels for AI with heuristic scoring (easy random, med/hard prefer good attacks + position)
-- [x] Game modes with proper flows, PWA manifest, improved audio, remaining counts, captured summary, training shows all
-- [x] Board with improved glyphs (stars, arrows, etc.)
-- [x] Build succeeds with @sveltejs/adapter-vercel
+**Current (SvelteKit + Tactveil):**
+- [x] SvelteKit 2 + Svelte 5 initialized with TS, ESLint, Prettier, Vitest, Playwright, adapter-vercel
+- [x] Pure engine in src/lib/game/ (types, config, board, movement, combat, setup, state/reducer, serializer)
+- [x] Svelte stores for game session with derived public views (supports handoff/training)
+- [x] Interactive UI: CSS Grid board (42px cells, glyphs like ★M, ⛏, 🗡️, owner bars), setup palette with remaining counts, click-to-place/select/move/attack, legal highlights
+- [x] Game modes: Single (Easy/Med/Hard AI with heuristics), Pass-and-Play (real handoff overlay + viewer switch), Training (all visible)
+- [x] Components: Board, Handoff, CombatModal, Victory
+- [x] Audio (Web Audio for move/combat/select/invalid)
+- [x] Basic persistence (save/load with serializer + localStorage + UI buttons)
+- [x] PWA: manifest.json, service-worker.ts
+- [x] Captured summary display (per player)
+- [x] AI with difficulty (random + scoring for attacks/position)
+- [x] Build clean, confirmed live at https://tactveil.vercel.app
 - [x] Pushed to https://github.com/simonellefsen/tactveil
-- Next: deeper AI (e.g. basic search), full E2E tests, original piece glyphs/SVGs, Vercel deploy + iPhone test, more audio
-- [ ] Immutable state updates + `applyAction(state, action, rng)`
-- [ ] Seeded RNG utility
-- [ ] Serialization (versioned, round-trip safe, migration path)
-- [ ] Full unit test suite passes (≥90% engine coverage, 100% on rules/projection)
-- [ ] Engine runs in Node (Vitest) with zero browser dependencies
+
+**Next:** Deeper AI (search/threats in worker), original SVG glyphs, full E2E tests, accessibility (keyboard), more polish, iPhone verification.
 - [ ] Development-only scenario builder (excluded from prod)
 
 **Current focus:** Build and test the pure rules engine **before** any board UI.

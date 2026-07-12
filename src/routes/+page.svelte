@@ -80,6 +80,7 @@
 	}
 
 	function handleCellClick(pos: Position) {
+		if (showHandoff) return; // prevent during handoff
 		const state = $game;
 		const cell = state.board[pos.row][pos.col];
 		playSelectSound();
@@ -254,11 +255,16 @@
 
 		{#if $game.phase === 'playing'}
 			<div class="captured">
-				<strong>Captured:</strong> 
-				{#each getCaptured() as cap}
-					<span class="cap-item {cap.player}">{cap.type}</span>
+				<strong>Captured pieces:</strong> 
+				<span class="cap-red">Red lost: </span>
+				{#each getCaptured().filter(c => c.player === 'red') as cap}
+					<span class="cap-item red">{cap.type}</span>
 				{/each}
-				<span class="hint">(revealed or eliminated)</span>
+				<span class="cap-blue"> | Blue lost: </span>
+				{#each getCaptured().filter(c => c.player === 'blue') as cap}
+					<span class="cap-item blue">{cap.type}</span>
+				{/each}
+				<span class="hint">(from board state)</span>
 			</div>
 		{/if}
 
@@ -301,6 +307,15 @@
 			/>
 		</div>
 
+		{#if mode === 'training' || $game.phase === 'playing'}
+			<div class="legend">
+				<strong>Legend:</strong> 
+				★M Marshal (10) | ◆G General (9) | C Colonel (8) | M Major (7) | C Captain (6) | L Lt (5) | S Sgt (4) | ⛏ Miner | → Scout | 🗡️ Spy | 💣 Bomb | ⚑ Flag
+				<br>
+				<span class="red">Red</span> / <span class="blue">Blue</span> — ? = hidden enemy
+			</div>
+		{/if}
+
 		<div class="log">
 			{#each log as entry}
 				<div>{entry}</div>
@@ -331,24 +346,56 @@
 		font-family: system-ui, sans-serif;
 	}
 
-	header h1 { font-size: 2rem; margin: 0; }
-	.subtitle { margin-top: 0; color: #888; }
+	header {
+		border-bottom: 1px solid #2a2f3a;
+		padding-bottom: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	header h1 { 
+		font-size: 2rem; 
+		margin: 0; 
+		letter-spacing: 1px;
+		text-transform: uppercase;
+	}
+	.subtitle { 
+		margin-top: 0.25rem; 
+		color: #888; 
+		font-size: 0.85rem;
+	}
 
 	.start-screen {
 		text-align: center;
 		margin-top: 3rem;
 	}
 
+	.modes {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.mode-group {
+		display: flex;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
 	.modes button {
-		display: block;
-		width: 100%;
-		max-width: 320px;
-		margin: 0.5rem auto;
-		padding: 0.8rem;
+		display: inline-block;
+		padding: 0.6rem 1rem;
 		background: #2a2f3a;
 		border: 1px solid #3a414f;
 		color: #e8e4d9;
 		cursor: pointer;
+		border-radius: 3px;
+		font-size: 0.85rem;
+	}
+
+	.modes button:hover {
+		background: #3a414f;
+		border-color: #4a515f;
 	}
 
 	.status-bar {
@@ -356,9 +403,11 @@
 		gap: 1rem;
 		background: #1a1f2a;
 		padding: 0.4rem 0.6rem;
-		margin-bottom: 1rem;
+		margin-bottom: 0.5rem;
 		font-size: 0.85rem;
 		flex-wrap: wrap;
+		border: 1px solid #2a2f3a;
+		border-radius: 3px;
 	}
 
 	.setup-ui, .play-actions {
@@ -406,20 +455,38 @@
 	.captured {
 		margin: 0.5rem 0;
 		font-size: 0.8rem;
+		padding: 0.3rem 0.5rem;
+		background: #1a1f2a;
+		border-radius: 3px;
+		border: 1px solid #2a2f3a;
 	}
 
 	.cap-item {
 		display: inline-block;
 		margin: 0 2px;
-		padding: 1px 3px;
+		padding: 1px 4px;
 		border-radius: 2px;
 		font-size: 0.7rem;
+		border: 1px solid #444;
 	}
 
-	.cap-item.red { background: #5a3a2a; }
-	.cap-item.blue { background: #2a3a5a; }
+	.cap-item.red { background: #3a2a20; }
+	.cap-item.blue { background: #202a3a; }
 
 	.hint { font-size: 0.7rem; color: #666; margin-left: 4px; }
+
+	.legend {
+		margin-top: 0.5rem;
+		font-size: 0.7rem;
+		color: #aaa;
+		background: #1a1f2a;
+		padding: 0.3rem 0.5rem;
+		border-radius: 3px;
+		line-height: 1.3;
+	}
+
+	.legend .red { color: #f0c0a0; font-weight: bold; }
+	.legend .blue { color: #a0c0f0; font-weight: bold; }
 
 	.winner { color: #5a8a5a; font-weight: bold; }
 

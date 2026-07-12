@@ -112,6 +112,16 @@ This log records important decisions, trade-offs, and rationale. All agents must
 - **Scope:** Purely diagnostic / confidence-building. Will be replaced in Phase 3+.
 - **Owner:** Product Lead.
 
+## 2026-07-12 — UI Polish & Features
+- Improved Board with tactical styling (owner bottom bars for accessibility, better glyphs, responsive).
+- Added captured per-player display.
+- Training now shows all via showAll prop.
+- Passplay handoff switches viewer properly.
+- AI difficulties with scoring.
+- PWA manifest + save/load UI.
+- Confirmed deployment at https://tactveil.vercel.app
+- Updated status/docs.
+
 ## Future Decision Areas (to be filled during implementation)
 
 - Exact lake coordinate representation in code vs rules doc (confirm 0-based vs 1-based labeling).
