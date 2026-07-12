@@ -39,8 +39,11 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 - [x] Seeded RNG (mulberry32 style) for determinism
 - [x] RANDOMIZE_SETUP implemented with seeded generator
 - [x] Versioned serialization (serialize/deserialize + replay export)
-- [x] Unit tests: 21 passing (combat exact rules, movement/Scout, state, projection, serializer roundtrips, integration randomize+privacy)
-- [x] Minimal runnable demo page (text representation) exercising engine + public views (for verification only)
+- [x] Unit tests passing (engine logic)
+- [x] Interactive Svelte UI: CSS Grid board, piece palette for setup, click-to-select and move/attack, handoff simulation, public view masking
+- [x] Proper component structure (Board.svelte)
+- [x] Service worker for offline assets
+- [x] Build succeeds with @sveltejs/adapter-vercel
 - [ ] Board model + lake/position utilities implemented and unit-tested
 - [ ] Legal move generator for every piece type (including Scout pathing)
 - [ ] Combat resolution (exact priority algorithm from rules) implemented + exhaustive tests

@@ -99,7 +99,14 @@ This log records important decisions, trade-offs, and rationale. All agents must
 - **Rationale:** Fast, excellent TypeScript support, works for pure functions without a browser. Coverage reporting enabled. Later React Testing Library will be added for components.
 - **Owner:** QA + Technical Architect alignment.
 
-### 2026-07-12 — Minimal Demo Page
+### 2026-07-12 — SvelteKit Migration + Tactveil Name
+- Switched from Next.js/React to Svelte 5 + SvelteKit 2 per user request.
+- New GitHub repo: https://github.com/simonellefsen/tactveil
+- Engine kept pure in src/lib/game/
+- Interactive board UI implemented with CSS Grid, selection, legal moves.
+- New repo configured with gh (topics, description, etc.)
+
+### 2026-07-12 — Minimal Demo Page (updated)
 - **Decision:** Added a very small 'use client' demo on the root page that lets you randomize/commit setups and see a public text board for the red player.
 - **Rationale:** Allows immediate verification that the engine + hidden-info projection work in a browser context without building any polished board, pieces, or interaction system yet.
 - **Scope:** Purely diagnostic / confidence-building. Will be replaced in Phase 3+.
