@@ -4,6 +4,8 @@ A polished, production-ready, client-only implementation of Stratego as an insta
 
 **Current Status:** Phase 2 — Core Engine in progress. (Phase 1 specifications approved.)
 
+**Repository:** https://github.com/simonellefsen/stratego
+
 ## Key Principles
 
 - **Fully client-only** — Everything (game logic, AI, persistence, rendering) lives in the browser.

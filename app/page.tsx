@@ -6,8 +6,9 @@ import {
   applyAction,
   getPublicGameView,
   serializeGameState,
+  getLegalMoves,
 } from '@/engine';
-import type { GameState, PublicGameView } from '@/engine';
+import type { GameState, PublicGameView, Position, Piece } from '@/engine';
 
 export default function StrategoEngineDemo() {
   const [game, setGame] = useState<GameState>(() => createInitialState('singleplayer'));
@@ -49,6 +50,57 @@ export default function StrategoEngineDemo() {
     setGame(fresh);
     setView(getPublicGameView(fresh, 'red'));
     setLog(['Game reset.']);
+  }
+
+  function handleRandomMove() {
+    if (game.phase !== 'playing') {
+      setLog((l) => [...l, 'Can only move during playing phase']);
+      return;
+    }
+
+    const current = game.currentPlayer;
+    const viewerForView = current; // use current player's perspective for legal moves
+
+    // Find pieces belonging to current player that have legal moves
+    const candidates: { pos: Position; moves: ReturnType<typeof getLegalMoves> }[] = [];
+
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        const pos: Position = { row: r, col: c };
+        const piece = game.board[r][c];
+        if (piece && piece.player === current) {
+          const legal = getLegalMoves(game.board, pos, current);
+          if (legal.length > 0) {
+            candidates.push({ pos, moves: legal });
+          }
+        }
+      }
+    }
+
+    if (candidates.length === 0) {
+      setLog((l) => [...l, `No legal moves for ${current}. Game may be over.`]);
+      return;
+    }
+
+    // Pick random candidate and random destination
+    const candidate = candidates[Math.floor(Math.random() * candidates.length)];
+    const chosenMove = candidate.moves[Math.floor(Math.random() * candidate.moves.length)];
+
+    const isAttack = !!game.board[chosenMove.to.row][chosenMove.to.col];
+
+    try {
+      const action = isAttack
+        ? ({ type: 'ATTACK', from: candidate.pos, to: chosenMove.to } as const)
+        : ({ type: 'MOVE', from: candidate.pos, to: chosenMove.to } as const);
+
+      const next = applyAction(game, action);
+      refreshView(next);
+
+      const pieceType = game.board[candidate.pos.row][candidate.pos.col]?.type;
+      setLog((l) => [...l, `${current} ${isAttack ? 'attacks' : 'moves'} with ${pieceType} (${candidate.pos.row},${candidate.pos.col} → ${chosenMove.to.row},${chosenMove.to.col})`]);
+    } catch (e: any) {
+      setLog((l) => [...l, `Move error: ${e.message}`]);
+    }
   }
 
   const redReady = game.setup.red.committed;
@@ -97,6 +149,13 @@ export default function StrategoEngineDemo() {
                 className="px-4 py-2 border border-[#2F3741] rounded text-sm"
               >
                 Reset
+              </button>
+              <button
+                onClick={handleRandomMove}
+                disabled={game.phase !== 'playing'}
+                className="px-4 py-2 bg-[#5319E7] text-white rounded text-sm disabled:opacity-50"
+              >
+                Play random move (current turn)
               </button>
             </div>
 
