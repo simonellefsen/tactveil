@@ -170,6 +170,9 @@
 		{#if $game.winner}
 			<div class="winner">🏆 Winner: {$game.winner}</div>
 		{/if}
+		{#if $game.lastCombat}
+			<div class="combat">Last combat: {$game.lastCombat.attacker.type} vs {$game.lastCombat.defender.type} → {$game.lastCombat.outcome}</div>
+		{/if}
 	</div>
 
 	{#if $game.phase === 'setup'}
