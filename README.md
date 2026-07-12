@@ -40,12 +40,11 @@ See `src/lib/game/` for the engine and `src/lib/stores/game.ts` for the Svelte i
 ## Status
 
 - Pure engine complete (movement, combat, setup, serialization, projections)
-- SvelteKit UI: interactive CSS Grid board, manual/random setup, click-to-move, legal highlights, public view masking, handoff overlay, combat modal, victory screen, game modes (single w/ AI, passplay, training)
-- Basic audio feedback + local persistence
-- Service worker for offline
-- Build + deploy ready with adapter-vercel
-- Next: full AI (deeper), more accessibility, PWA manifest, comprehensive tests
+- SvelteKit UI: interactive CSS Grid board with original-style glyphs, manual setup + counts, full click-to-play, handoff, modals, modes (single+3-level AI, passplay, training all-visible)
+- Basic audio, save/load, PWA manifest + SW
+- Build + deploy ready with @sveltejs/adapter-vercel
+- Next: deeper AI, tests, iPhone polish, deploy
 
-All per original multi-agent spec.
+All per original multi-agent spec. Playable from setup to victory.
 
 All previous requirements (client-only, no backend state, iPhone friendly, original assets) remain in force.
