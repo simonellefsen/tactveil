@@ -72,6 +72,10 @@
 		if (diff) difficulty = diff;
 		gameStarted = true;
 		resetGame();
+		// Try to load previous game
+		if (loadGame()) {
+			addLog('Loaded previous game');
+		}
 		initAudio();
 		selected = null;
 		selectedPieceType = null;
