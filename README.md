@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Modern Stratego — Browser Game
 
-## Getting Started
+A polished, production-ready, client-only implementation of Stratego as an installable web app / PWA. Designed to run beautifully in modern desktop browsers and especially on iPhone Safari as a Home Screen web app. No accounts, no backend, no external services.
 
-First, run the development server:
+**Current Status:** Phase 2 — Core Engine in progress. (Phase 1 specifications approved.)
+
+## Key Principles
+
+- **Fully client-only** — Everything (game logic, AI, persistence, rendering) lives in the browser.
+- **Offline-first PWA** — Playable after initial load or Home Screen install, even without network.
+- **Strict hidden information** — Opponent pieces are never exposed except through legal game mechanics.
+- **Original assets & design** — Modern tactical command table aesthetic. No copied commercial artwork or sounds.
+- **Tested & deterministic** — Pure engine with seeded randomness for reproducible tests and replays.
+- **iPhone excellence** — Touch-first, safe areas, installable, works great in portrait/landscape.
+
+## Documentation (Phase 1 — Complete & Approved)
+
+All specifications live in `docs/`:
+
+- `product-spec.md` — Vision, required modes, out-of-scope, definition of done.
+- `game-rules.md` — **Authoritative rules** (piece counts, movement, exact combat priority, victory, hidden info).
+- `architecture.md` — Client-only layering, TypeScript contracts, pure engine, data flow.
+- `privacy-model.md` — How hidden information is protected across every surface.
+- `visual-direction.md` — Design tokens, piece representation, iOS handling, states.
+- `test-plan.md` — Unit, component, E2E, PWA, and manual device testing strategy.
+- `decisions.md` — Important architectural and rule decisions + trade-offs.
+- `project-status.md` — Living checklist against the 8 phases and Definition of Done.
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # Start dev server
+npm run test         # Run Vitest (engine first)
+npm run test:run     # CI-friendly single run
+npm run build        # Production build
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Current Focus (Phase 2)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The pure game engine lives in `engine/` (framework-independent TypeScript).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- All rules are implemented as pure functions.
+- Full internal state knows every piece.
+- Public views are produced by projection functions only.
+- Deterministic via seeded RNG.
+- Comprehensive unit tests required before any UI work on the board.
 
-## Learn More
+UI work (the board, setup screens, etc.) will come **after** the engine + tests are solid.
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure (Current)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+/Users/lindau/T3/stratego
+├── README.md
+├── docs/                     # All Phase 1 specifications
+├── engine/                   # ← Pure game engine (in progress)
+│   └── *.ts + *.test.ts
+├── app/                      # Next.js App Router (UI shell later)
+├── public/
+└── ... (package.json, vitest.config.ts, etc.)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Game Modes (All supported)
 
-## Deploy on Vercel
+1. Single-player vs Computer (Easy / Medium / Hard)
+2. Local Pass-and-Play (with privacy handoff screen)
+3. Training / Solo Visible (all pieces shown for learning)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Definition of Done
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `docs/project-status.md`. The project is only complete when:
+
+- Full playable game from setup to victory in all modes
+- Engine enforces every rule exactly
+- AI is fully local and offline
+- Safe pass-and-play with no leakage
+- Installable PWA on iPhone that works offline
+- All tests green + independent review passed
+- Successful Vercel production deploy
+
+## Next Steps
+
+Engine implementation + tests → Interaction prototype → AI opponents → Polish, PWA, accessibility → Independent review → Vercel deploy.
+
+---
+
+**All work follows the multi-agent workflow and strict client-only + hidden-information constraints defined in the Phase 1 documents.**

@@ -25,7 +25,33 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 
 
 
-## Phase 2: Engine — Not Started
+## Phase 2: Engine — In Progress
+
+**Started:** 2026-07-12 after user confirmation of Phase 1 specs.
+
+- [x] Next.js 16 project initialized (App Router, TS strict, Tailwind, ESLint)
+- [x] Vitest configured for pure engine tests
+- [x] Domain types (`Piece`, `Position`, `GameState`, `Action`, `CombatResult`, etc.) defined in `engine/types.ts`
+- [x] Board model + lake/position utilities (engine/board.ts)
+- [x] Legal move generator for standard pieces + Scout (engine/movement.ts)
+- [x] Exact combat resolution algorithm (engine/combat.ts)
+- [x] Setup placement, commit, applyAction reducer, public view projection (engine/state.ts)
+- [x] Seeded RNG (mulberry32 style) for determinism
+- [x] Initial unit tests passing (combat, movement, state, projection)
+- [ ] Board model + lake/position utilities implemented and unit-tested
+- [ ] Legal move generator for every piece type (including Scout pathing)
+- [ ] Combat resolution (exact priority algorithm from rules) implemented + exhaustive tests
+- [ ] Setup validation + auto-setup (random legal placement)
+- [ ] Victory / no-legal-move detection
+- [ ] Hidden-information projection (`getPublicBoard(viewer)`) with tests proving no leakage
+- [ ] Immutable state updates + `applyAction(state, action, rng)`
+- [ ] Seeded RNG utility
+- [ ] Serialization (versioned, round-trip safe, migration path)
+- [ ] Full unit test suite passes (≥90% engine coverage, 100% on rules/projection)
+- [ ] Engine runs in Node (Vitest) with zero browser dependencies
+- [ ] Development-only scenario builder (excluded from prod)
+
+**Current focus:** Build and test the pure rules engine **before** any board UI.
 
 - [ ] Domain types (`Piece`, `Position`, `GameState`, `Action`, `CombatResult`, etc.) defined in `src/engine/types.ts`
 - [ ] Board model + lake/position utilities implemented and unit-tested

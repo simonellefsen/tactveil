@@ -80,6 +80,25 @@ This log records important decisions, trade-offs, and rationale. All agents must
 - **Rationale:** Any online play would require external state, accounts, or servers — forbidden by the project constraints. Local pass-and-play + strong single-player AI is the supported experience.
 - **Owner:** Product Lead.
 
+## Phase 2 Decisions (Engine Implementation)
+
+### 2026-07-12 — Project Bootstrap
+- **Decision:** Initialize with Next.js 16 (App Router + Tailwind + TS + ESLint) using the official template.
+- **Rationale:** Matches the technology preferences and Vercel deployment requirements. Pure engine will live outside the React tree.
+- **Details:** `engine/` directory created at project root for maximum framework independence. Vitest added for engine tests. Custom project README restored with links to all Phase 1 specs.
+- **Owner:** Product Lead / Orchestrator.
+
+### 2026-07-12 — Engine Location & Purity
+- **Decision:** Place the complete game engine in `engine/` (root level) rather than burying it inside `app/` or `src/`.
+- **Rationale:** Makes it crystal clear that `engine/` must have zero React, zero Next.js, zero DOM imports. Easy to test in pure Node via Vitest. Matches the "framework-independent core" requirement in architecture.md.
+- **Trade-off:** Slightly non-standard folder for Next.js, but worth the clarity for this project.
+- **Owner:** Technical Architect (via Product Lead).
+
+### 2026-07-12 — Testing Setup
+- **Decision:** Use Vitest with Node environment for all engine unit tests. Tests live next to implementation (`*.test.ts`).
+- **Rationale:** Fast, excellent TypeScript support, works for pure functions without a browser. Coverage reporting enabled. Later React Testing Library will be added for components.
+- **Owner:** QA + Technical Architect alignment.
+
 ## Future Decision Areas (to be filled during implementation)
 
 - Exact lake coordinate representation in code vs rules doc (confirm 0-based vs 1-based labeling).
