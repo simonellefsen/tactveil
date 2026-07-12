@@ -218,9 +218,8 @@
 
 		{#if $game.phase === 'playing'}
 			<div class="captured">
-				<strong>Captured:</strong> 
-				Red has captured some of Blue's forces (see board for revealed).
-				<!-- Simple: high value lost if not present -->
+				<strong>Captured summary:</strong> High-value pieces lost by opponent shown as revealed or missing on board.
+				<!-- For full list, track in engine history in future -->
 			</div>
 		{/if}
 
