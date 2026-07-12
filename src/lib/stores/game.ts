@@ -4,13 +4,15 @@
  * Single source of truth for game state.
  */
 
-import { writable, derived, type Readable } from 'svelte/store';
+import { writable, derived, get, type Readable } from 'svelte/store';
 import {
 	createInitialState,
 	applyAction,
 	getPublicGameView,
 	getLegalMoves,
 	createSeededRNG,
+	serializeGameState,
+	deserializeGameState,
 	type GameState,
 	type PublicGameView,
 	type Action,
@@ -92,4 +94,25 @@ export function makeAIMove() {
 
 // For pass-and-play: after move, game is ready for handoff
 // The UI will show handoff overlay before next player acts.
+
+const STORAGE_KEY = 'tactveil:game';
+
+export function saveGame() {
+	const current = get(gameState);
+	try {
+		localStorage.setItem(STORAGE_KEY, serializeGameState(current));
+	} catch {}
+}
+
+export function loadGame() {
+	try {
+		const saved = localStorage.getItem(STORAGE_KEY);
+		if (saved) {
+			const loaded = deserializeGameState(saved);
+			gameState.set(loaded);
+			return true;
+		}
+	} catch {}
+	return false;
+}
 

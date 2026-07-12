@@ -45,6 +45,7 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 - [x] Basic audio (Web Audio beeps for actions/combat)
 - [x] Simple AI for single player (random legal after human move)
 - [x] Service worker for offline assets
+- [x] Basic localStorage save/load via serializer
 - [x] Build succeeds with @sveltejs/adapter-vercel
 - [x] Pushed to https://github.com/simonellefsen/tactveil
 - [ ] Board model + lake/position utilities implemented and unit-tested
