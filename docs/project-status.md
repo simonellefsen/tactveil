@@ -39,7 +39,8 @@ Use this checklist to track progress against the Definition of Done and Phase ga
 - [x] Seeded RNG (mulberry32 style) for determinism
 - [x] RANDOMIZE_SETUP implemented with seeded generator
 - [x] Versioned serialization (serialize/deserialize + replay export)
-- [x] Unit tests: 20 passing (combat exact rules, movement/Scout, state, projection, serializer roundtrips)
+- [x] Unit tests: 21 passing (combat exact rules, movement/Scout, state, projection, serializer roundtrips, integration randomize+privacy)
+- [x] Minimal runnable demo page (text representation) exercising engine + public views (for verification only)
 - [ ] Board model + lake/position utilities implemented and unit-tested
 - [ ] Legal move generator for every piece type (including Scout pathing)
 - [ ] Combat resolution (exact priority algorithm from rules) implemented + exhaustive tests

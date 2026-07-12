@@ -99,6 +99,12 @@ This log records important decisions, trade-offs, and rationale. All agents must
 - **Rationale:** Fast, excellent TypeScript support, works for pure functions without a browser. Coverage reporting enabled. Later React Testing Library will be added for components.
 - **Owner:** QA + Technical Architect alignment.
 
+### 2026-07-12 — Minimal Demo Page
+- **Decision:** Added a very small 'use client' demo on the root page that lets you randomize/commit setups and see a public text board for the red player.
+- **Rationale:** Allows immediate verification that the engine + hidden-info projection work in a browser context without building any polished board, pieces, or interaction system yet.
+- **Scope:** Purely diagnostic / confidence-building. Will be replaced in Phase 3+.
+- **Owner:** Product Lead.
+
 ## Future Decision Areas (to be filled during implementation)
 
 - Exact lake coordinate representation in code vs rules doc (confirm 0-based vs 1-based labeling).
